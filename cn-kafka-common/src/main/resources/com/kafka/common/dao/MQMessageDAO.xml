@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.kafka.common.dao.MQMessageDAO">
+
+	<resultMap id="mqMessageResult" type="cn.kafka.common.entity.MQMessage">
+		<result column="id" property="id" />
+		<result column="message_type" property="messageType" typeHandler="cn.kafka.common.dao.typehandler.MQMessageTypeTypeHandler"/>
+		<result column="ack_id" property="ackId" />
+		<result column="topic" property="topic" />
+		<result column="status" property="status" typeHandler="cn.kafka.common.dao.typehandler.MQMessageStatusTypeHandler"/>
+		<result column="send_cnt" property="sendCnt" />
+		<result column="next_send_time" property="nextSendTime" />
+		<result column="content" property="content" />
+		<result column="ack_content" property="ackContent" />
+		<result column="receive_time" property="receiveTime" />
+		<result column="last_send_time" property="lastSendTime" />
+		<result column="create_time" property="createTime" />
+		<result column="ackTopic" property="ackTopic" />
+	</resultMap>
+
+
+	<sql id="Base_Column_List">
+		select 
+			id, message_type, ack_id, topic, status, send_cnt, next_send_time, 
+			content, ack_content, receive_time, last_send_time, create_time,ackTopic
+		from 
+			t_mq_message_record
+	</sql>
+
+	<select id="selectOne" resultMap="mqMessageResult">
+		<include refid="Base_Column_List" />
+		where id = #{id} and message_type = #{messageType, typeHandler= cn.kafka.common.dao.typehandler.MQMessageTypeTypeHandler}
+	</select>
+	
+	<select id="selectNeedSendMessage" resultMap="mqMessageResult">
+		<include refid="Base_Column_List" />
+		where 
+			status = 1 and message_type = 1 and next_send_time <![CDATA[<]]> now() and send_cnt <![CDATA[<]]> 10
+	</select>
+	
+	<update id="setAck" parameterType="java.util.Map">
+		update t_mq_message_record set ack_id = #{ackId}, ack_content = #{ackContent}, receive_time = now(), status=#{status, typeHandler=cn.kafka.common.dao.typehandler.MQMessageStatusTypeHandler} where id = #{id} and message_type = #{messageType, typeHandler= cn.kafka.common.dao.typehandler.MQMessageTypeTypeHandler}
+	</update>
+	
+	<update id="updateMessage" parameterType="java.util.Map">
+		update t_mq_message_record set next_send_time = #{nextSendTime}, send_cnt = send_cnt + 1, last_send_time = #{lastSendTime} where id = #{id} and message_type = #{messageType, typeHandler= cn.kafka.common.dao.typehandler.MQMessageTypeTypeHandler}
+	</update>
+	
+
+	<insert id="insert" parameterType="cn.kafka.common.entity.MQMessage">
+		insert into t_mq_message_record (
+			id, ack_id, topic, status, message_type, send_cnt, next_send_time, 
+			content, ack_content, receive_time, last_send_time, create_time,ackTopic
+		)
+		values (
+			#{id}, #{ackId}, #{topic}, #{status, typeHandler=cn.kafka.common.dao.typehandler.MQMessageStatusTypeHandler},
+			 #{messageType, typeHandler= cn.kafka.common.dao.typehandler.MQMessageTypeTypeHandler}, #{sendCnt}, #{nextSendTime},
+			#{content}, #{ackContent}, #{receiveTime}, #{lastSendTime}, now(),#{ackTopic}
+		)
+	</insert>	
+</mapper>

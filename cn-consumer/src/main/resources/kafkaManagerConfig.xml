@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- 封装kafkaManagerFactory -->
+    <bean id="kafkaManagerFactory" class="cn.kafka.lib.KafkaManagerFactory" init-method="init" destroy-method="destory">
+
+        <!-- 生产者配置 -->
+        <property name="producerConfig">
+            <map>
+                <entry key="metadata.broker.list" value="localhost:9092"/>
+                <entry key="serializer.class" value="kafka.serializer.StringEncoder"/>
+                <entry key="key.serializer.class" value="kafka.serializer.StringEncoder"/>
+                <entry key="request.required.acks" value="1"/>
+            </map>
+        </property>
+
+        <!-- 消费者配置 -->
+        <property name="consumerConfig">
+            <map>
+                <entry key="auto.commit.enable" value="false"/>
+                <entry key="zookeeper.connect" value="localhost:2181"/>
+                <entry key="auto.offset.reset" value="smallest"/>
+                <entry key="serializer.class" value="kafka.serializer.StringEncoder"/>
+            </map>
+        </property>
+        <property name="consumers">
+            <list>
+                <ref bean="messageConsumer"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="producerManager" class="cn.kafka.lib.ProducerManager" factory-method="getInstance"
+          destroy-method="destory"/>
+</beans>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cn.kafka</groupId>
+    <artifactId>cn-kafka</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <maven_compiler_plugin_version>2.3.2</maven_compiler_plugin_version>
+        <java_source_version>1.8</java_source_version>
+        <java_target_version>1.8</java_target_version>
+        <file_encoding>UTF-8</file_encoding>
+        <maven_source_plugin_version>2.1.1</maven_source_plugin_version>
+        <maven_jar_plugin_version>2.3.2</maven_jar_plugin_version>
+        <maven_war_plugin_version>2.1.1</maven_war_plugin_version>
+        <maven_install_plugin_version>2.3.1</maven_install_plugin_version>
+        <maven_deploy_plugin_version>2.7</maven_deploy_plugin_version>
+        <maven_resources_plugin_version>2.4</maven_resources_plugin_version>
+
+        <spring_version>4.1.7.RELEASE</spring_version>
+        <slf4j_log4j_version>1.7.5</slf4j_log4j_version>
+        <mysql_connector_java_version>5.1.38</mysql_connector_java_version>
+        <junit_version>4.11</junit_version>
+        <zkClient_version>0.1</zkClient_version>
+        <dubbo_version>2.5.3</dubbo_version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring_boot_version>1.2.5.RELEASE</spring_boot_version>
+        <fastjson_version>1.2.14</fastjson_version>
+        <zookeeper_version>3.4.6</zookeeper_version>
+        <slf4j_log4j_version>1.7.21</slf4j_log4j_version>
+        <mybatis_spring_version>1.2.2</mybatis_spring_version>
+        <mybatis_version>3.2.2</mybatis_version>
+        <commons_dbcp_version>1.4</commons_dbcp_version>
+        <aspectjrt_version>1.8.9</aspectjrt_version>
+        <cglib_version>2.1_3</cglib_version>
+        <commons_codec_version>1.10</commons_codec_version>
+        <kafka_lib_version>0.8.2.0</kafka_lib_version>
+    </properties>
+    <modules>
+        <module>cn-kafka-lib</module>
+        <module>cn-kafka-common</module>
+    </modules>
+
+
+</project>

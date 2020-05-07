@@ -42,6 +42,8 @@
     <modules>
         <module>cn-kafka-lib</module>
         <module>cn-kafka-common</module>
+        <module>cn-consumer</module>
+        <module>cn-provider</module>
     </modules>
 
 

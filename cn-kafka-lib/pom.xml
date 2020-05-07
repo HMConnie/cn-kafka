@@ -20,7 +20,7 @@
         <maven_deploy_plugin_version>2.7</maven_deploy_plugin_version>
         <maven_resources_plugin_version>2.4</maven_resources_plugin_version>
 
-        <spring_version>4.1.7.RELEASE</spring_version>
+        <spring_version>5.0.7.RELEASE</spring_version>
         <slf4j_log4j_version>1.7.5</slf4j_log4j_version>
         <mysql_connector_java_version>5.1.38</mysql_connector_java_version>
         <junit_version>4.11</junit_version>

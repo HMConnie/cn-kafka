@@ -36,6 +36,7 @@
         <commons_dbcp_version>1.4</commons_dbcp_version>
         <aspectjrt_version>1.8.9</aspectjrt_version>
         <cglib_version>2.1_3</cglib_version>
+        <curator_recipes_version>2.7.1</curator_recipes_version>
         <commons_codec_version>1.10</commons_codec_version>
         <kafka_lib_version>0.8.2.0</kafka_lib_version>
     </properties>

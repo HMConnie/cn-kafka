@@ -5,6 +5,7 @@ import cn.kafka.common.entity.MQMessage;
 import cn.kafka.common.entity.MQMessageStatus;
 import cn.kafka.common.entity.MQMessageTemplate;
 import cn.kafka.common.entity.MQMessageType;
+import cn.kafka.common.lock.DistributedLock;
 import cn.kafka.common.utils.JSONUtils;
 import cn.kafka.lib.Consumer;
 import cn.kafka.lib.ProducerManager;
@@ -20,6 +21,13 @@ public abstract class AbstractConsumer<T> extends Consumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConsumer.class);
 
+    /**
+     * 获取锁
+     *
+     * @return
+     */
+    protected abstract DistributedLock getDistributedLock();
+
     @Autowired
     private MQMessageDAO mqMessageDAO;
 
@@ -31,35 +39,47 @@ public abstract class AbstractConsumer<T> extends Consumer {
         if (!MQMessageType.SEND.equals(template.getMessageType())) {
             return;
         }
+        boolean isLock = false;
+        try {
+            isLock = getDistributedLock().getLock(this.getClass().getName() + "-" + template.getId() + "-" + MQMessageType.SEND);
+            if (!isLock) {
+                return;
+            }
 
-        MQMessage message = mqMessageDAO.selectOne(template.getId(), MQMessageType.ACK);
-        if (message != null && message.getStatus().equals(MQMessageStatus.ACKED)) {
-            ack(JSONUtils.parseObject(message.getAckContent()), message.getAckId(), message.getId(), template.getAckTopic());
-            return;
+            MQMessage message = mqMessageDAO.selectOne(template.getId(), MQMessageType.ACK);
+            if (message != null && message.getStatus().equals(MQMessageStatus.ACKED)) {
+                ack(JSONUtils.parseObject(message.getAckContent()), message.getAckId(), message.getId(), template.getAckTopic());
+                return;
+            }
+
+            Object ackData = execute(JSONUtils.convert(template.getData(), getMessageClass()));
+            String ackId = Dui1DuiStringUtils.generateUUID();
+
+            message = new MQMessage();
+            message.setId(template.getId());
+            message.setAckId(ackId);
+            message.setTopic(getTopic());
+            message.setContent(JSONUtils.convertString(template.getData()));
+            message.setAckContent(JSONUtils.convertString(ackData));
+            message.setStatus(MQMessageStatus.ACKED);
+            message.setReceiveTime(new Date());
+            message.setSendCnt(0L);
+            message.setLastSendTime(template.getSendTime());
+            message.setNextSendTime(template.getSendTime());
+            message.setMessageType(MQMessageType.ACK);
+
+            // 消费者存储生产者传递的参数
+            message.setAckTopic(template.getAckTopic());
+
+            mqMessageDAO.insert(message);
+
+            ack(ackData, ackId, template.getId(), template.getAckTopic());
+        } finally {
+            if (isLock) {
+                getDistributedLock().releaseLock();
+            }
         }
 
-        Object ackData = execute(JSONUtils.convert(template.getData(), getMessageClass()));
-        String ackId = Dui1DuiStringUtils.generateUUID();
-
-        message = new MQMessage();
-        message.setId(template.getId());
-        message.setAckId(ackId);
-        message.setTopic(getTopic());
-        message.setContent(JSONUtils.convertString(template.getData()));
-        message.setAckContent(JSONUtils.convertString(ackData));
-        message.setStatus(MQMessageStatus.ACKED);
-        message.setReceiveTime(new Date());
-        message.setSendCnt(0L);
-        message.setLastSendTime(template.getSendTime());
-        message.setNextSendTime(template.getSendTime());
-        message.setMessageType(MQMessageType.ACK);
-
-        // 消费者存储生产者传递的参数
-        message.setAckTopic(template.getAckTopic());
-
-        mqMessageDAO.insert(message);
-
-        ack(ackData, ackId, template.getId(), template.getAckTopic());
     }
 
     private void ack(Object ackData, String ackId, String id, String ackTopic) {

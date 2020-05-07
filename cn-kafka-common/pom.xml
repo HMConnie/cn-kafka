@@ -51,6 +51,12 @@
             <artifactId>spring-jdbc</artifactId>
             <version>${spring_version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>${curator_recipes_version}</version>
+        </dependency>
+
     </dependencies>
 
 

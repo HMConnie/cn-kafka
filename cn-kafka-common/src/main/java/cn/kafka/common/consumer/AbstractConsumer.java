@@ -19,14 +19,7 @@ import java.util.Date;
 
 public abstract class AbstractConsumer<T> extends Consumer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConsumer.class);
-
-    /**
-     * 获取锁
-     *
-     * @return
-     */
-    protected abstract DistributedLock getDistributedLock();
+    private static final Logger LOGGER=LoggerFactory.getLogger(AbstractConsumer.class);
 
     @Autowired
     private MQMessageDAO mqMessageDAO;
@@ -35,27 +28,31 @@ public abstract class AbstractConsumer<T> extends Consumer {
     private ProducerManager producerManager;
 
     protected void process(String msg) throws Exception {
-        MQMessageTemplate template = JSON.parseObject(msg, MQMessageTemplate.class);
+
+        MQMessageTemplate template=JSON.parseObject(msg, MQMessageTemplate.class);
         if (!MQMessageType.SEND.equals(template.getMessageType())) {
             return;
         }
-        boolean isLock = false;
+
+        boolean isLock=false;
+
         try {
-            isLock = getDistributedLock().getLock(this.getClass().getName() + "-" + template.getId() + "-" + MQMessageType.SEND);
+            isLock=getDistributedLock().getLock(this.getClass().getName() + "-" + template.getId() + "-" + MQMessageType.SEND);
+
             if (!isLock) {
                 return;
             }
 
-            MQMessage message = mqMessageDAO.selectOne(template.getId(), MQMessageType.ACK);
+            MQMessage message=mqMessageDAO.selectOne(template.getId(), MQMessageType.ACK);
             if (message != null && message.getStatus().equals(MQMessageStatus.ACKED)) {
                 ack(JSONUtils.parseObject(message.getAckContent()), message.getAckId(), message.getId(), template.getAckTopic());
                 return;
             }
 
-            Object ackData = execute(JSONUtils.convert(template.getData(), getMessageClass()));
-            String ackId = Dui1DuiStringUtils.generateUUID();
+            Object ackData=execute(JSONUtils.convert(template.getData(), getMessageClass()));
+            String ackId= Dui1DuiStringUtils.generateUUID();
 
-            message = new MQMessage();
+            message=new MQMessage();
             message.setId(template.getId());
             message.setAckId(ackId);
             message.setTopic(getTopic());
@@ -79,19 +76,18 @@ public abstract class AbstractConsumer<T> extends Consumer {
                 getDistributedLock().releaseLock();
             }
         }
-
     }
 
     private void ack(Object ackData, String ackId, String id, String ackTopic) {
         try {
-            MQMessageTemplate template = new MQMessageTemplate();
+            MQMessageTemplate template=new MQMessageTemplate();
             template.setAckId(ackId);
             template.setData(ackData);
             template.setId(id);
             template.setMessageType(MQMessageType.ACK);
             template.setSendTime(new Date());
             producerManager.sendMessage(ackTopic, JSON.toJSONString(template));
-        } catch (Exception e) {
+        } catch(Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }
@@ -99,4 +95,10 @@ public abstract class AbstractConsumer<T> extends Consumer {
     protected abstract Class<T> getMessageClass();
 
     protected abstract Object execute(T data) throws Exception;
+
+    /**
+     * 获取锁
+     * @return
+     */
+    protected abstract DistributedLock getDistributedLock();
 }

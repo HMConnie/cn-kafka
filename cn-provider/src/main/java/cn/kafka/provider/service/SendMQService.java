@@ -11,7 +11,6 @@ import cn.kafka.common.utils.TopicConstant;
 import cn.kafka.lib.ProducerManager;
 import com.alibaba.fastjson.JSON;
 import com.sgcai.commons.lang.utils.Dui1DuiStringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
